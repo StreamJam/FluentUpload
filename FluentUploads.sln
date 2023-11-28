@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8AD598CE-8C83-4FBE-AD9A-5B70BABC90DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentUploads", "src\FluentUploads\FluentUploads.csproj", "{EF16487D-5F32-4800-AD07-435B90ECE2C9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{E729656A-08D5-4E02-8C2B-A1E597EEC0C9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "toys", "toys", "{59360A5E-A222-402C-836C-100A7EA8DD85}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestWebApi", "toys\TestWebApi\TestWebApi.csproj", "{885DF010-A8F3-43D9-BFD1-2545DE62BDBC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EF16487D-5F32-4800-AD07-435B90ECE2C9} = {8AD598CE-8C83-4FBE-AD9A-5B70BABC90DD}
+		{885DF010-A8F3-43D9-BFD1-2545DE62BDBC} = {59360A5E-A222-402C-836C-100A7EA8DD85}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EF16487D-5F32-4800-AD07-435B90ECE2C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF16487D-5F32-4800-AD07-435B90ECE2C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF16487D-5F32-4800-AD07-435B90ECE2C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF16487D-5F32-4800-AD07-435B90ECE2C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{885DF010-A8F3-43D9-BFD1-2545DE62BDBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{885DF010-A8F3-43D9-BFD1-2545DE62BDBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{885DF010-A8F3-43D9-BFD1-2545DE62BDBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{885DF010-A8F3-43D9-BFD1-2545DE62BDBC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
