@@ -4,43 +4,19 @@ using Microsoft.AspNetCore.Routing;
 
 namespace FluentUploads;
 
-public class FileUploadRouteBuilder
-{
-    private readonly IEndpointRouteBuilder _routeBuilder;
-    private readonly string _pattern;
-
-    public FileUploadRouteBuilder(IEndpointRouteBuilder routeBuilder, string pattern)
-    {
-        _routeBuilder = routeBuilder;
-        _pattern = pattern;
-    }
-
-    public FileUploadRouteBuilder<TMetadata> WithFileMetadata<TMetadata>(Func<HttpContext, Task<TMetadata>> metadataFunc)
-    {
-        return new FileUploadRouteBuilder<TMetadata>(_routeBuilder, _pattern, metadataFunc);
-    }
-
-    public void Build()
-    {
-        _routeBuilder.MapPost(_pattern, async (HttpContext context) =>
-        {
-            
-        });
-    }
-}
 
 public class FileUploadRouteBuilder<TMetadata>
 {
     private readonly IEndpointRouteBuilder _routeBuilder;
     private readonly string _pattern;
-    private Func<HttpContext, Task<TMetadata>> _metadataFunc;
     private Func<HttpContext, TMetadata, Task>? _completionFunc;
+    private readonly Delegate _handler;
 
-    public FileUploadRouteBuilder(IEndpointRouteBuilder routeBuilder, string pattern, Func<HttpContext, Task<TMetadata>> metadataFunc)
+    public FileUploadRouteBuilder(IEndpointRouteBuilder routeBuilder, string pattern, Delegate handler)
     {
         _routeBuilder = routeBuilder;
         _pattern = pattern;
-        _metadataFunc = metadataFunc;
+        _handler = handler;
     }
 
     public FileUploadRouteBuilder<TMetadata> OnUploadComplete(Func<HttpContext, TMetadata, Task> completionFunc)
@@ -51,9 +27,6 @@ public class FileUploadRouteBuilder<TMetadata>
 
     public void Build()
     {
-        _routeBuilder.MapPost(_pattern, async (HttpContext context) =>
-        {
-            TMetadata metadata = await _metadataFunc(context);
-        });
+        _routeBuilder.MapPost(_pattern, _handler);
     }
 }

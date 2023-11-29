@@ -1,4 +1,5 @@
 using FluentUploads;
+using OneOf;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,19 +34,29 @@ app.MapGet("/weatherforecast",
                         summaries[Random.Shared.Next(summaries.Length)]
                     ))
                 .ToArray();
+            
             return TypedResults.Ok(forecast);
         })
     .WithName("GetWeatherForecast")
     .WithOpenApi();
 
-app.MapFileUpload("/files/{id}/upload", async (string id) =>
-    {
-        if (id != "123")
-            return Results.BadRequest("Invalid ID");
-        
-        return Results.Ok();
-    })
-    .WithFileMetadata(async context => new { User = context.User.Identity.Name, RandomGarbage = "Whatever random shit you want" })
+OneOf<IValueHttpResult<UploadMetadata>, IResult> result = TypedResults.BadRequest("yo");
+GenericHack<UploadMetadata, IResult> hack = TypedResults.BadRequest("yo");
+GenericHack<UploadMetadata, IResult> hack2 = TypedResults.Ok(new UploadMetadata("josh", "stuff"));
+
+Console.WriteLine(hack2.Value);
+
+
+app.MapFileUpload<UploadMetadata, string>("/files/{id}/upload",
+        async (string id) =>
+        {
+            if (id != "josh")
+            {
+                return TypedResults.BadRequest("Invalid user");
+            }
+
+            return TypedResults.Ok(new UploadMetadata("josh", "stuff"));
+        })
     .OnUploadComplete(async (context, metadata) =>
     {
         Console.WriteLine($"Upload complete! Completed by {metadata.User}. ${metadata.RandomGarbage}");
@@ -53,6 +64,7 @@ app.MapFileUpload("/files/{id}/upload", async (string id) =>
 
 app.Run();
 
+record UploadMetadata(string User, string RandomGarbage);
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
