@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using System.Text.Json;
+
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.AspNetCore.Http;
@@ -16,27 +18,32 @@ public class UploadService<TMetadata> : IUploadService<TMetadata>
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<string> CreateUpload(TMetadata metadata, string filename, long maxFileSizeBytes = 1024 * 1024, string? callbackId = null)
+    public async Task<PresignedUpload> CreateUpload(TMetadata metadata, string filename, long maxFileSizeBytes = 1024 * 1024, string? callbackId = null)
     {
         string? displayName = _httpContextAccessor?.HttpContext?.GetEndpoint()?.DisplayName;
+        string fileId = Guid.NewGuid().ToString();
 
         var request = new GetPreSignedUrlRequest()
         {
             BucketName = "fluentuploads-test",
-            Key = $"{Guid.NewGuid().ToString()}-{filename}",
+            Key = $"{fileId}-{filename}",
             Expires = DateTime.UtcNow.AddMinutes(60),
             Verb = HttpVerb.PUT,
-            ContentType = "image/jpeg"
+            // ContentType = "video/mp4"
         };
-        request.Headers["Content-Length"] = maxFileSizeBytes.ToString();
+        // request.Headers["Content-Length"] = maxFileSizeBytes.ToString();
         
         string? presignedUrl = await _s3Client.GetPreSignedURLAsync(request);
 
-        await UploadRandomDataUsingPresignedUrl(presignedUrl, 1);
+        string metadataJson = JsonSerializer.Serialize(metadata);
+        UploadCallbackService.MetadataByFileId[fileId] = metadataJson;
+        UploadCallbackService.UriByFileId[fileId] = $"https://pub-e5bd95d5cb1c44978ee90d63f5fe8a70.r2.dev/{request.Key}";
 
-        return presignedUrl;
+        // await UploadRandomDataUsingPresignedUrl(presignedUrl, 1);
+
+        return new PresignedUpload(fileId, presignedUrl);
     }
-    
+
     public async Task UploadRandomDataUsingPresignedUrl(string presignedUrl, int sizeInMb)
     {
         // Generate in-memory random data
@@ -63,5 +70,51 @@ public class UploadService<TMetadata> : IUploadService<TMetadata>
             string responseContent = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"Failed to upload content. Status Code: {response.StatusCode} {responseContent}");
         }
+    }
+}
+
+public class UploadService : IUploadService
+{
+    private readonly IAmazonS3 _s3Client;
+
+    public UploadService(IAmazonS3 s3Client)
+    {
+        _s3Client = s3Client;
+    }
+
+    public async Task<UploadedFile> UploadFile(string filePath, string filename, string contentType)
+    {
+        string fileId = Guid.NewGuid().ToString();
+
+        var request = new GetPreSignedUrlRequest()
+        {
+            BucketName = "fluentuploads-test",
+            Key = $"{fileId}-{filename}",
+            Expires = DateTime.UtcNow.AddMinutes(60),
+            Verb = HttpVerb.PUT,
+            // ContentType = "video/mp4"
+        };
+        // request.Headers["Content-Length"] = maxFileSizeBytes.ToString();
+        
+        string? presignedUrl = await _s3Client.GetPreSignedURLAsync(request);
+
+        // Upload the file to the presigned URL
+        using var httpClient = new HttpClient();
+        using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+        
+        var uploadRequest = new HttpRequestMessage(HttpMethod.Put, presignedUrl)
+        {
+            Content = new StreamContent(fileStream)
+        };
+
+        uploadRequest.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
+
+        var response = await httpClient.SendAsync(uploadRequest);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"Failed to upload file. Status Code: {response.StatusCode}");
+        }
+        
+        return new UploadedFile(fileId, $"https://pub-e5bd95d5cb1c44978ee90d63f5fe8a70.r2.dev/{request.Key}");
     }
 }

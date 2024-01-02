@@ -9,7 +9,7 @@ namespace FluentUploads;
 public static class EndpointRouteBuilderExtensions
 {
     public static RouteHandlerBuilder HandleFileUpload<TMetadata>(this RouteHandlerBuilder builder, 
-        Func<TMetadata, Task> uploadCompleteHandler)
+        Func<UploadContext<TMetadata>, Task> uploadCompleteHandler)
     {
         builder.WithMetadata(new UploadEndpointMetadata<TMetadata>(uploadCompleteHandler));
         return builder;
