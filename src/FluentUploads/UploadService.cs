@@ -82,7 +82,7 @@ public class UploadService : IUploadService
         _s3Client = s3Client;
     }
 
-    public async Task<UploadedFile> UploadFile(string filePath, string filename, string contentType)
+    public async Task<UploadedFile> UploadFile(string filePath, string filename, string contentType, Action<decimal>? onProgress = null)
     {
         string fileId = Guid.NewGuid().ToString();
 
@@ -104,7 +104,7 @@ public class UploadService : IUploadService
         
         var uploadRequest = new HttpRequestMessage(HttpMethod.Put, presignedUrl)
         {
-            Content = new StreamContent(fileStream)
+            Content = new CustomProgressContent(fileStream, onProgress)
         };
 
         uploadRequest.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);

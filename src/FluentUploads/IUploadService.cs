@@ -7,5 +7,5 @@ public interface IUploadService<TMetadata>
 
 public interface IUploadService
 {
-    public Task<UploadedFile> UploadFile(string filePath, string filename, string contentType);
+    public Task<UploadedFile> UploadFile(string filePath, string filename, string contentType, Action<decimal>? onProgress = null);
 }
