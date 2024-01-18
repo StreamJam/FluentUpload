@@ -24,7 +24,7 @@ internal class CustomProgressContent : HttpContent
         {
             await stream.WriteAsync(buffer, 0, bytesRead);
             totalBytesRead += bytesRead;
-            _onProgress?.Invoke(totalBytesRead / _stream.Length);
+            _onProgress?.Invoke(totalBytesRead / (decimal)_stream.Length);
         }
     }
 
